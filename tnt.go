@@ -1,6 +1,7 @@
 package tntsessions
 
 import (
+	"reflect"
 	"time"
 
 	"fmt"
@@ -10,7 +11,7 @@ import (
 )
 
 //ErrNotFound is returned by SessionsBase method Get if session with given ID was not found
-var ErrNotFound = fmt.Errorf("Session not found")
+var ErrNotFound = fmt.Errorf("Not found")
 
 //ErrSessionExpired is returned by SessionsBase method Get if session with given ID is expired
 var ErrSessionExpired = fmt.Errorf("Session expired")
@@ -125,17 +126,35 @@ func (sess *Session) Set(key string, value interface{}) {
 	sess.data[key] = value
 }
 
+//IsSet checks if current key is exists in session
+func (sess *Session) IsSet(key string) (bool, error) {
+	if sess == nil {
+		return false, fmt.Errorf("Err nil session")
+	} else if sess.data == nil {
+		return false, fmt.Errorf("Err nil session data")
+	}
+
+	_, ok := sess.data[key]
+	return ok, nil
+}
+
 //GetString returns string if such exists on the key, or empty string
-func (sess *Session) GetString(key string) string {
+func (sess *Session) GetString(key string) (string, error) {
+	if sess == nil {
+		return "", fmt.Errorf("Err nil session")
+	} else if sess.data == nil {
+		return "", fmt.Errorf("Err nil session data")
+	}
+
 	res, ok := sess.data[key]
 	if !ok {
-		return ""
+		return "", ErrNotFound
 	}
 
 	switch res.(type) {
 	case string:
-		return res.(string)
+		return res.(string), nil
 	default:
-		return ""
+		return "", fmt.Errorf("Value is of type %s", reflect.TypeOf(res))
 	}
 }
