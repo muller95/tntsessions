@@ -138,7 +138,8 @@ func (sess *Session) IsSet(key string) (bool, error) {
 	return ok, nil
 }
 
-//GetString returns string if such exists on the key, or empty string
+//GetString returns string if such exists on the key,
+//or error if not found or type is not string
 func (sess *Session) GetString(key string) (string, error) {
 	if sess == nil {
 		return "", fmt.Errorf("Err nil session")
@@ -156,5 +157,27 @@ func (sess *Session) GetString(key string) (string, error) {
 		return res.(string), nil
 	default:
 		return "", fmt.Errorf("Value is of type %s", reflect.TypeOf(res))
+	}
+}
+
+//GetFloat returns float if such exists on the key,
+//or error if not found or type is not float
+func (sess *Session) GetFloat(key string) (float64, error) {
+	if sess == nil {
+		return 0.0, fmt.Errorf("Err nil session")
+	} else if sess.data == nil {
+		return 0.0, fmt.Errorf("Err nil session data")
+	}
+
+	res, ok := sess.data[key]
+	if !ok {
+		return 0.0, ErrNotFound
+	}
+
+	switch res.(type) {
+	case float64:
+		return res.(float64), nil
+	default:
+		return 0.0, fmt.Errorf("Value is of type %s", reflect.TypeOf(res))
 	}
 }
